@@ -200,11 +200,11 @@ output "instance" {
   value = data.aws_instances.asg.public_ips
 }
 ```
-That means the output will be the Public IP addresses of ec2 instances.
+That means the output will be the Public IP addresses of 2 ec2 instances.
 
 provider.tf and variable.tf files are attached.
 
-Now lets have a look into ansible-playbook and understand how can we update website contents without server recreation. Please note that we are able to apply this method only because the the content is updated using userdata.
+Now lets have a look into ansible-playbook and understand how can we update website contents without server recreation. Please note that we are able to apply this method only because the the content is updated using userdata. I have combined 2 plays in this playbook.
 
 ### Ansible-playbook
 
@@ -294,6 +294,21 @@ Now lets have a look into ansible-playbook and understand how can we update webs
       wait_for:
         timeout: 20
 ```
+
+Let me **explain each task** in Playbook
+
+#### Play 1
+
+***Task 1 : Basic deploy of a service***
+       Here using the "community.general.terraform" module and mentioning the terraform project path, our terraform code will be executed and whole infra will be created. The output is then storing to the "inst" .
+       
+***Task 2: Print the Public IPs***
+Using the value stored in "inst" of previous task, print the public IP address of 2 ec2 instances.
+ 
+***Task 3: Creating Dynamic Inventory***
+Using the value stored in "inst" of 1st task, that is using those public IP addresses, inventory file will be created
+
+***Task 4: Print the Public IPs***
 
 
 
