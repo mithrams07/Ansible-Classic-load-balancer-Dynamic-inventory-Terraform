@@ -346,6 +346,8 @@ Wait for the connection draining time. Server will be active then.
 
 The tasks 3, 4, 5, 6 and 7 will be excuted only when the gitstatus changed state is true. That means only when the git repository is updated with new version of the site.
 
+This is the case for server 1. Even this server was offloaded from load balancer, the server 2 is still in service. That is the advantage of using serial keyword. Now all these tasks in Play 2 will be executed for server 2. 
+
 
 ## Conclusion
 
