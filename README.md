@@ -4,7 +4,18 @@
 
 Here, Our scenario is:
 
-Consider we have classic load balancer which have 2 ec2 instances created from an autoscaling group. The site have website contents which is uploaded via userdata(contents clonned from a git repository) while creating launch configuration. If the git repository is updated with new version of the site, we have to make the changes in our ec2 instances. How can we do it without recreating the servers. Lets check it.
+Consider we have classic load balancer which have 2 ec2 instances created from an autoscaling group. The site have website contents which is uploaded via below userdata(contents clonned from a git repository) while creating launch configuration.
+
+```
+#!/bin/bash
+yum install httpd php git -y
+git clone https://github.com/mithrams07/aws-elb-site /var/website
+cp -r /var/website/* /var/www/html/
+chown -R apache:apache /var/www/html/*
+systemctl restart httpd.service
+systemctl enable httpd.service
+```
+If the git repository is updated with new version of the site, we have to make the changes in our ec2 instances. How can we do it without recreating the servers. Lets check it.
 
 We can do this by Ansible. Here I am using Terraform to build the infra.
 
@@ -308,7 +319,36 @@ Using the value stored in "inst" of previous task, print the public IP address o
 ***Task 3: Creating Dynamic Inventory***
 Using the value stored in "inst" of 1st task, that is using those public IP addresses, inventory file will be created
 
-***Task 4: Print the Public IPs***
+#### Play 2
 
+By default, Ansible runs each task on all hosts affected by a play before starting the next task on any host (by default upto 5 servers). Here inorder to avoid down time, we have to execute all tasks for 1 server then for the remaining. For that purpose, we can use the serial keyword. Here we used the serial keyword and it is set to 1. Hence all tasks will be bexecuted for the 1st server then for the second one.
+
+***Task 1: Package Installation***
+Install php, httpd and git packages on server.
+
+***Task 2: Clonning Github Repository***
+Clonning git repository https://github.com/mithrams07/aws-elb-site.git to directory /var/website/ and register it to variable gitstatus.
+
+***Task 3: Backend off loading from elb***
+Server heath check is confirming by checking the file health.html.By making its permission to 000, the server will be offloaded from the load balancer after 30 seconds.
+
+***Task 4: waiting for connection draining***
+waiting for connection draining time. 
+
+***Task 5: updating site contents***
+Now the one of the servers is in offloaded state. In this task the updated website content that we have clonned in task 2 will be copied to /var/www/html/. This task will be excuted only when the register variable gitstatus changed status is true.
+
+***Task 6: loading backend to elb***
+Here the health.html file permission will be reverted to 644 and server will be again inservice status in load balancer.
+
+***Task 7 : waiting for connection draining"***
+Wait for the connection draining time. Server will be active then.
+
+The tasks 3, 4, 5, 6 and 7 will be excuted only when the gitstatus changed state is true. That means only when the git repository is updated with new version of the site.
+
+
+## Conclusion
+
+Here I have explained about how to update the site newer version without server recreation (load balancer + autoscaling group) only when the site update is via userdata.
 
 
