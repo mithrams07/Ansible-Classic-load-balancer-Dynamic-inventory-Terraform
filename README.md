@@ -349,6 +349,6 @@ The tasks 3, 4, 5, 6 and 7 will be excuted only when the gitstatus changed state
 
 ## Conclusion
 
-Here I have explained about how to update the site newer version without server recreation (load balancer + autoscaling group) only when the site update is via userdata.
+Here I have explained about how to update the site newer version without server recreation (load balancer + autoscaling group) only applicable when the site update is via userdata.
 
 
