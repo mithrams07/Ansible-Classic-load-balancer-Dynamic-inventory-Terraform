@@ -1,11 +1,11 @@
-data "aws_instances" "ASG" {
+data "aws_instances" "asg" {
+
   instance_tags = {
     Name = var.project
    }
 }
 
-
 output "instance" {
 
-  value = data.aws_instances.ASG.public_ips
+  value = data.aws_instances.asg.public_ips
 }
